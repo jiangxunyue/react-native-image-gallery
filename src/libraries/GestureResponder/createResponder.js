@@ -22,7 +22,7 @@ const MOVE_THRESHOLD = 2;
 
 let DEV = false;
 
-function initializeGestureState(gestureState) {
+function initializeGestureState (gestureState) {
     gestureState.moveX = 0;
     gestureState.moveY = 0;
     gestureState.x0 = 0;
@@ -44,7 +44,7 @@ function initializeGestureState(gestureState) {
     gestureState._singleTabFailed = false;
 }
 
-function updateGestureStateOnMove(gestureState, touchHistory, e) {
+function updateGestureStateOnMove (gestureState, touchHistory, e) {
     const movedAfter = gestureState._accountsForMovesUpTo;
     const prevX = previousCentroidXOfTouchesChangedAfter(touchHistory, movedAfter);
     const x = currentCentroidXOfTouchesChangedAfter(touchHistory, movedAfter);
@@ -72,7 +72,7 @@ function updateGestureStateOnMove(gestureState, touchHistory, e) {
     gestureState.previousPinch = pinchDistance(touchHistory, movedAfter, false);
 }
 
-function clearInteractionHandle(interactionState) {
+function clearInteractionHandle (interactionState) {
     if (interactionState.handle) {
         InteractionManager.clearInteractionHandle(interactionState.handle);
         interactionState.handle = null;
@@ -85,14 +85,14 @@ function clearInteractionHandle(interactionState) {
  * @param interval
  * @returns {*}
  */
-function convertToMillisecIfNeeded(interval) {
+function convertToMillisecIfNeeded (interval) {
     if (interval > 1000000) {
         return interval / 1000000;
     }
     return interval;
 }
 
-function cancelSingleTapConfirm(gestureState) {
+function cancelSingleTapConfirm (gestureState) {
     if (typeof gestureState._singleTapConfirmId !== 'undefined') {
         TimerMixin.clearTimeout(gestureState._singleTapConfirmId);
         gestureState._singleTapConfirmId = undefined;
@@ -113,7 +113,7 @@ function cancelSingleTapConfirm(gestureState) {
  * @param debug true to enable debug logs
  * @returns {{}}
  */
-export default function create(config) {
+export default function create (config) {
     if (config.debug) {
         DEV = true;
     }
@@ -296,7 +296,7 @@ export default function create(config) {
  * @param gestureState
  * @returns {boolean}
  */
-function effectiveMove(config, gestureState) {
+function effectiveMove (config, gestureState) {
     if (gestureState.numberActiveTouches > 1) {
         // on iOS simulator, a pinch gesture(move with alt pressed) will not change gestureState.dx(always 0)
         return true;

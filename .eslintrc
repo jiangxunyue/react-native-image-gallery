@@ -19,6 +19,9 @@
     "globals": {
         "__DEV__": false
     },
+  "plugins": [
+    "react"
+  ],
     "rules": {
         "indent": [2, 4],
         "generator-star-spacing": 0,
