@@ -157,7 +157,7 @@ export default class TransformableImage extends PureComponent {
             contentAspectRatio = width / height;
             if (viewWidth && viewHeight) {
                 maxScale = Math.max(width / viewWidth, height / viewHeight);
-                minScale = Math.max(1, viewWidth / (viewHeight * contentAspectRatio) - 0.01);
+                minScale = Math.max(1, (viewWidth - 4) / (viewHeight * contentAspectRatio));
                 maxScale = Math.max(minScale, maxScale);
             }
         }
