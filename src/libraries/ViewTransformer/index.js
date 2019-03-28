@@ -371,7 +371,7 @@ export default class ViewTransformer extends React.Component {
         if (durationInMillis) {
             duration = durationInMillis;
         }
-        react - native - image - gallery;
+        // react - native - image - gallery;
         let fromRect = this.transformedContentRect();
         if (fromRect.equals(targetRect, 0.01)) {
             return;
