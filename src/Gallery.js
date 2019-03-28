@@ -163,13 +163,17 @@ export default class Gallery extends PureComponent {
             return false;
         }
 
+
         const space = viewTransformer.getAvailableTranslateSpace();
         const dx = gestureState.moveX - gestureState.previousMoveX;
+        const dy = gestureState.moveY - gestureState.previousMoveY;
 
-        if (dx > 0 && space.left <= 0 && this.currentPage > 0) {
+        if (Math.abs(dy) > Math.abs(dx)) return false;
+        // console.warn(dx, space.left, space.right, this.currentPage)
+        if (dx > 0 && space.left <= 1 && this.currentPage > 0) {
             return true;
         }
-        if (dx < 0 && space.right <= 0 && this.currentPage < this.pageCount - 1) {
+        if (dx < 0 && space.right <= 1 && this.currentPage < this.pageCount - 1) {
             return true;
         }
         return false;
