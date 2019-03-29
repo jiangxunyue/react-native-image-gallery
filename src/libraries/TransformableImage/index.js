@@ -33,7 +33,7 @@ export default class TransformableImage extends PureComponent {
         resizeMode: 'contain'
     };
 
-    constructor (props) {
+    constructor(props) {
         super(props);
 
         this.onLayout = this.onLayout.bind(this);
@@ -47,63 +47,68 @@ export default class TransformableImage extends PureComponent {
             viewHeight: 0,
             imageLoaded: false,
             imageDimensions: props.image.dimensions,
-            keyAcumulator: 1
+            keyAcumulator: 1,
+            finishMeasure: !!props.image.dimensions,
         };
     }
 
-    componentWillMount () {
+    componentWillMount() {
         if (!this.state.imageDimensions) {
             this.getImageSize(this.props.image);
         }
     }
 
-    componentDidMount () {
+    componentDidMount() {
         this._mounted = true;
     }
 
-    componentWillReceiveProps (nextProps) {
+    componentWillReceiveProps(nextProps) {
         if (!sameImage(this.props.image, nextProps.image)) {
             // image source changed, clear last image's imageDimensions info if any
-            this.setState({imageDimensions: nextProps.image.dimensions, keyAcumulator: this.state.keyAcumulator + 1});
+            this.setState({
+                imageDimensions: nextProps.image.dimensions,
+                keyAcumulator: this.state.keyAcumulator + 1,
+                finishMeasure: !!nextProps.image.dimensions,
+                error: false,
+            });
             if (!nextProps.image.dimensions) { // if we don't have image dimensions provided in source
                 this.getImageSize(nextProps.image);
             }
         }
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
         this._mounted = false;
     }
 
-    onLoadStart (e) {
+    onLoadStart(e) {
         this.props.onLoadStart && this.props.onLoadStart(e);
         if (this.state.imageLoaded) {
             this.setState({imageLoaded: false});
         }
     }
 
-    onLoad (e) {
+    onLoad(e) {
         this.props.onLoad && this.props.onLoad(e);
         if (!this.state.imageLoaded) {
             this.setState({imageLoaded: true});
         }
     }
 
-    onLayout (e) {
+    onLayout(e) {
         let {width, height} = e.nativeEvent.layout;
         if (this.state.viewWidth !== width || this.state.viewHeight !== height) {
             this.setState({viewWidth: width, viewHeight: height});
         }
     }
 
-    getImageSize (image) {
+    getImageSize(image) {
         if (!image) {
             return;
         }
         const {source, dimensions} = image;
-
         if (dimensions) {
-            this.setState({imageDimensions: dimensions});
+            this.setState({imageDimensions: dimensions, finishMeasure: true, error: false});
             return;
         }
 
@@ -114,13 +119,14 @@ export default class TransformableImage extends PureComponent {
                     if (width && height) {
                         if (this.state.imageDimensions && this.state.imageDimensions.width === width && this.state.imageDimensions.height === height) {
                             // no need to update state
+                            this.setState({finishMeasure: true});
                         } else {
-                            this._mounted && this.setState({imageDimensions: {width, height}});
+                            this._mounted && this.setState({finishMeasure: true, imageDimensions: {width, height}});
                         }
                     }
                 },
                 () => {
-                    this._mounted && this.setState({error: true});
+                    this._mounted && this.setState({finishMeasure: true, error: true});
                 }
             );
         } else {
@@ -128,11 +134,11 @@ export default class TransformableImage extends PureComponent {
         }
     }
 
-    getViewTransformerInstance () {
+    getViewTransformerInstance() {
         return this.refs['viewTransformer'];
     }
 
-    renderError () {
+    renderError() {
         return (this.props.errorComponent && this.props.errorComponent()) || (
             <View style={{flex: 1, backgroundColor: 'black', alignItems: 'center', justifyContent: 'center'}}>
                 <Text style={{color: 'white', fontSize: 15, fontStyle: 'italic'}}>This image cannot be
@@ -141,8 +147,8 @@ export default class TransformableImage extends PureComponent {
         );
     }
 
-    render () {
-        const {imageDimensions, viewWidth, viewHeight, error, keyAccumulator, imageLoaded} = this.state;
+    render() {
+        const {imageDimensions, viewWidth, viewHeight, error, keyAccumulator, imageLoaded, finishMeasure} = this.state;
         const {style, image, imageComponent, resizeMode, enableTransform, enableScale, enableTranslate, onTransformGestureReleased, onViewTransformed} = this.props;
 
         let maxScale = 1, minScale = 1;
@@ -179,7 +185,7 @@ export default class TransformableImage extends PureComponent {
             <ViewTransformer
                 ref={'viewTransformer'}
                 key={'viewTransformer#' + keyAccumulator} // when image source changes, we should use a different node to avoid reusing previous transform state
-                enableTransform={enableTransform && imageLoaded} // disable transform until image is loaded
+                enableTransform={enableTransform && imageLoaded && finishMeasure} // disable transform until image is loaded
                 enableScale={enableScale}
                 enableTranslate={enableTranslate}
                 enableResistance={true}
@@ -190,13 +196,13 @@ export default class TransformableImage extends PureComponent {
                 contentAspectRatio={contentAspectRatio}
                 onLayout={this.onLayout}
                 style={style}>
-                {error ? this.renderError() : content}
+                {error ? this.renderError() : (finishMeasure ? content : null)}
             </ViewTransformer>
         );
     }
 }
 
-function sameImage (source, nextSource) {
+function sameImage(source, nextSource) {
     if (source === nextSource) {
         return true;
     }
